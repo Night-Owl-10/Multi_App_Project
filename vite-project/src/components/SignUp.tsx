@@ -9,6 +9,7 @@ import {
 import { useState } from "react"
 import axios from "axios"
 import { toast } from "react-toastify";
+import { Loader2 } from "lucide-react";
 
 type SignUpProps = {
     isSignUpOpen: boolean;
@@ -24,8 +25,10 @@ function SignUp({ isSignUpOpen, setIsSignUpOpen }: SignUpProps) {
         password: "",
         avatar: imageURL
     });
+    const [loading, setLoading] = useState(false);
 
     async function uploadImage(e: React.ChangeEvent<HTMLInputElement>) {
+        setLoading(true);
         const img = e.target.files;
         const data = new FormData();
         data.append("file", img ? img[0] : "");
@@ -38,6 +41,8 @@ function SignUp({ isSignUpOpen, setIsSignUpOpen }: SignUpProps) {
         } catch (error) {
             console.log(error);
             toast.error("Error uploading image");
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -84,8 +89,9 @@ function SignUp({ isSignUpOpen, setIsSignUpOpen }: SignUpProps) {
                             <p className="text-sm xs:text-base">Upload Avatar:</p>
                             <input type="file" onChange={(e) => uploadImage(e)} className="w-38 xs:w-48 text-center p-1 text-xs xs:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         </div>
-                        <div className="w-16 h-16 border border-gray-300 rounded-full overflow-hidden">
+                        <div className="w-16 h-16 border border-gray-300 rounded-full overflow-hidden relative">
                             <img src={imageURL} className="h-full w-full object-cover rounded-full" alt="Avatar preview" />
+                            {loading && <Loader2 className="loader" />}
                         </div>
                     </div>
                     <div className="flex justify-center items-center gap-4 mt-4">

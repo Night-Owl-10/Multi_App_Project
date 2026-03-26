@@ -4,6 +4,9 @@ import { connectDB } from './Connection/connection';
 import taskRoutes from './Routes/taskRoute';
 import userRoutes from './Routes/userRoute';
 import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 connectDB();
 

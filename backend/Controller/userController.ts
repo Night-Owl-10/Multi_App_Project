@@ -1,6 +1,7 @@
 import User from "../Model/userModal";
 import Task from "../Model/taskModel"
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 const cookieSettings = { httpOnly: true, secure: false, sameSite: "lax", maxAge: 3600000 }
 
@@ -15,10 +16,12 @@ export const registerUser = async (req: any, res: any) => {
         if (emailExists) {
             return res.status(400).json({ message: "Email already exists" });
         }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({
             username,
             email,
-            password,
+            password: hashedPassword,
             avatar: req.body.avatar || ""
         });
         await newUser.save();
@@ -36,12 +39,12 @@ export const loginUser = async (req: any, res: any) => {
         if (!user) {
             return res.status(400).json({ message: "Invalid email or password" });
         }
-        const isPasswordValid = password === user.password;
+        const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
             return res.status(400).json({ message: "Invalid email or password" });
         }
 
-        const token = jwt.sign({ userId: user._id }, "your_jwt_secret", { expiresIn: "1h" });
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY!, { expiresIn: "1h" });
         res.cookie("token", token, cookieSettings);
 
         res.status(200).json({ message: "Login successful", user });

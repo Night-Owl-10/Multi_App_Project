@@ -5,6 +5,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { Edit, Check, Trash2, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogTrigger,
@@ -28,7 +29,7 @@ function Profile() {
     avatar: imageEditing
   });
   const [confirmDelete, setConfirmDelete] = useState("");
-
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,6 +44,7 @@ function Profile() {
   }
 
   async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setLoading(true);
     const img = e.target.files;
     const data = new FormData();
     data.append("file", img ? img[0] : "");
@@ -55,6 +57,8 @@ function Profile() {
     } catch (error) {
       console.log(error);
       toast.error("Error uploading image");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -99,9 +103,10 @@ function Profile() {
           <div className="h-38 w-38 md:h-48 md:w-48 rounded-full overflow-hidden group relative">
             <img src={imageEditing} className="h-full w-full object-cover" alt="Vite logo" />
             <label htmlFor="file" className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-              <Edit className="text-white" />
+              {!loading && <Edit className="text-white" />}
               <input type="file" onChange={(e) => handleImageChange(e)} id="file" className="hidden" />
             </label>
+            {loading && <Loader2 className="loader" />}
           </div>
           <div className="flex flex-col align-center md:align-start gap-4">
             <div className="flex items-center gap-2">

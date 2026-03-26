@@ -58,3 +58,22 @@ header .themeSelector .activeTheme {
   background-blend-mode: overlay, overlay, normal;
   transition: all 500ms;
 }
+
+.loader {
+  position: absolute;
+  top: 45%;
+  right: 45%;
+  opacity: 1;
+  color: rgba(255, 255, 255, 0.533);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
