@@ -3,8 +3,7 @@ import clsx from 'clsx'
 import { useState, useEffect } from 'react'
 import API from '../api/axios'
 import { toast } from 'react-toastify'
-import { useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { useUser } from "@clerk/react";
 
 type Tasks = {
   _id: number;
@@ -21,7 +20,7 @@ type TaskListProps = {
 function TaskList({ setEditTask, refetch, setRefetch }: TaskListProps) {
   const [taskList, setTaskList] = useState<Tasks[]>([]);
 
-  const { user } = useContext(AuthContext)!;
+  const { isSignedIn, user } = useUser();
 
   useEffect(() => {
     async function fetchTasks() {
@@ -34,7 +33,7 @@ function TaskList({ setEditTask, refetch, setRefetch }: TaskListProps) {
     }
 
     fetchTasks();
-  }, [refetch, user]);
+  }, [refetch, isSignedIn]);
 
   function handleEdit(id: number) {
     const taskToEdit = taskList.find(task => task._id === id);

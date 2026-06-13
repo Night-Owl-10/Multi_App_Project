@@ -1,19 +1,14 @@
-import SignIn from "./SignIn"
-import SignUp from "./SignUp";
+
 import { useState, useEffect } from "react"
-import { useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
-import API from "../api/axios";
 import { toast } from "react-toastify";
 import { useNavigate, Link } from "react-router-dom";
+import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/react'
 
 function Header() {
 
-  const [isSignInOpen, setIsSignInOpen] = useState(false);
-  const [isSignUpOpen, setIsSignUpOpen] = useState(false);
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  const { user, setUser } = useContext(AuthContext)!;
   const [theme, setTheme] = useState(JSON.parse(localStorage.getItem("theme") || "null") || "medium");
 
   useEffect(() => {
@@ -27,20 +22,6 @@ function Header() {
     return location.pathname === path;
   }
 
-  async function handleSignOut() {
-
-    try {
-      const response = await API.post("/users/logout", {});
-      toast.success(response.data.message);
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
-      setUser(null);
-      window.location.reload();
-    } catch (error) {
-      toast.error("Error signing out. Please try again.");
-    }
-  }
-
   return (
     <header>
       <div className="bg-white h-16 border border-gray-300 border-b-2 shadow-[-10px_0px_20px_-5px_rgba(0,0,0,0.3)] rounded-t-lg w-full flex justify-between items-center gap-4 px-4 md:px-8">
@@ -50,32 +31,38 @@ function Header() {
           </div>
           <h1 className="text-xl md:text-2xl font-semibold">Multi App</h1>
         </div>
-        <SignIn isSignInOpen={isSignInOpen} setIsSignInOpen={setIsSignInOpen} />
-        <SignUp isSignUpOpen={isSignUpOpen} setIsSignUpOpen={setIsSignUpOpen} />
         <div className="relative">
-          <div className="h-8 w-8 md:h-12 md:w-12 rounded-full overflow-hidden flex justify-center items-center cursor-pointer" onClick={() => setDropdownOpen(prev => !prev)}>
-            <img src={user ? user.avatar : "https://res.cloudinary.com/dru7e6cnq/image/upload/v1774356031/default-profile-picture1_cfijqb.jpg"} className="h-full w-full object-cover" alt="Vite logo" />
-          </div>
+          <Show when="signed-out">
+            <div className="h-8 w-8 md:h-12 md:w-12 rounded-full overflow-hidden flex justify-center items-center cursor-pointer" onClick={() => setDropdownOpen(prev => !prev)}>
+              <img src={"https://res.cloudinary.com/dru7e6cnq/image/upload/v1774356031/default-profile-picture1_cfijqb.jpg"} className="h-full w-full object-cover" alt="Vite logo" />
+            </div>
+          </Show>
+          <Show when="signed-in">
+            <UserButton
+              appearance={{
+                elements: {
+                  avatarBox: "!h-8 !w-8 border-2 border-blue-500",
+                  card: "shadow-sm",
+                  navbar: "bg-gray-100",
+                  profileSectionPrimaryButton: "!bg-blue-500"
+                }
+              }} />
+          </Show>
+
           {
             dropdownOpen && (
-              <div className="absolute top-10 right-0 z-10 bg-white border border-gray-300 rounded-md shadow-md w-40 flex flex-col">
-                {!user && <button onClick={() => {
-                  setIsSignInOpen(true);
-                  setDropdownOpen(false);
-                }} className="px-4 py-2 hover:bg-gray-100 text-left">Sign In</button>}
-                {!user && <button onClick={() => {
-                  setIsSignUpOpen(true);
-                  setDropdownOpen(false);
-                }} className="px-4 py-2 hover:bg-gray-100 text-left">Sign Up</button>}
-                {user && <button onClick={() => {
-                  navigate("/profile");
-                  setDropdownOpen(false);
-                }} className="px-4 py-2 hover:bg-gray-100 text-left">Profile</button>}
-                {user && <button onClick={() => {
-                  handleSignOut();
-                  setDropdownOpen(false);
-                }} className="px-4 py-2 hover:bg-gray-100 text-left">Sign Out</button>}
-              </div>
+              <Show when="signed-out">
+                <div className="absolute top-10 right-0 z-10 bg-white border border-gray-300 rounded-md shadow-md w-40 flex flex-col">
+
+                  <SignInButton>
+                    <button className="px-4 py-2 hover:bg-gray-100 text-left">Sign In</button>
+                  </SignInButton>
+                  <SignUpButton>
+                    <button className="px-4 py-2 hover:bg-gray-100 text-left">Sign Up</button>
+                  </SignUpButton>
+
+                </div>
+              </Show>
             )
           }
         </div>

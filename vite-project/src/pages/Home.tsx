@@ -2,9 +2,7 @@ import TaskList from "../components/TaskList"
 import { useState } from "react"
 import { toast } from "react-toastify"
 import API from "../api/axios"
-import { useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
-
+import { useUser } from "@clerk/react";
 
 type Task = {
   _id: number;
@@ -19,7 +17,7 @@ function Home() {
   const [editTask, setEditTask] = useState<Task | null>(null);
   const [refetch, setRefetch] = useState(false);
 
-  const { user } = useContext(AuthContext)!;
+  const { isSignedIn, user } = useUser();
 
   function handleReset() {
     setTask("");
@@ -44,7 +42,7 @@ function Home() {
     try {
       e.preventDefault();
 
-      if (!user) {
+      if (!isSignedIn) {
         toast.error("You must be logged in to add or edit tasks");
         return;
       }
@@ -98,7 +96,7 @@ function Home() {
       </form>
 
       <div className="bg-white border border-gray-300 shadow-gray-400 shadow-md rounded-lg w-full flex flex-col gap-4 p-4 mt-24 h-105 overflow-y-scroll">
-        {!user
+        {!isSignedIn
           ? <p className="text-center text-gray-500">Please sign in to view and manage your tasks.</p>
           : <TaskList setEditTask={setEditTask} refetch={refetch} setRefetch={setRefetch} />
         }

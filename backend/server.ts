@@ -2,9 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import { connectDB } from './Connection/connection';
 import taskRoutes from './Routes/taskRoute';
-import userRoutes from './Routes/userRoute';
+import webhookRoutes from './Routes/webhookRoute';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+import { clerkMiddleware } from '@clerk/express'
 
 dotenv.config();
 
@@ -33,9 +34,10 @@ app.use(
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(clerkMiddleware());
 
 app.use('/api', taskRoutes);
-app.use('/api/users', userRoutes);
+app.use('/api', webhookRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

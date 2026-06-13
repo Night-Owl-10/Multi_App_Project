@@ -4,12 +4,15 @@ import './index.css'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { lazy } from 'react';
 import App from './App';
+import { ClerkProvider } from '@clerk/react'
 
 const Home = lazy(() => import('./pages/Home'));
-const Profile = lazy(() => import('./pages/Profile'));
 const PageNotFound = lazy(() => import('./pages/PageNotFound'));
 const Weather = lazy(() => import('./pages/Weather'));
 const TicTacToe = lazy(() => import('./pages/TicTacToe'));
+
+
+const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 
 const appRouter = createBrowserRouter([
@@ -20,10 +23,6 @@ const appRouter = createBrowserRouter([
       {
         index: true,
         element: <Suspense fallback={<div className='flex justify-center items-center h-screen text-center text-2xl font-bold'>Loading...</div>}> <Home /></Suspense>
-      },
-      {
-        path: "profile",
-        element: <Suspense fallback={<div className='flex justify-center items-center h-screen text-center text-2xl font-bold'>Loading...</div>}> <Profile /></Suspense>
       },
       {
         path: "weather",
@@ -40,6 +39,8 @@ const appRouter = createBrowserRouter([
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <RouterProvider router={appRouter} />
+    <ClerkProvider publishableKey={clerkPubKey}>
+      <RouterProvider router={appRouter} />
+    </ClerkProvider>
   </StrictMode>,
 )
