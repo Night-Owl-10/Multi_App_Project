@@ -10,6 +10,8 @@ const Home = lazy(() => import('./pages/Home'));
 const PageNotFound = lazy(() => import('./pages/PageNotFound'));
 const Weather = lazy(() => import('./pages/Weather'));
 const TicTacToe = lazy(() => import('./pages/TicTacToe'));
+const SsoCallback = lazy(() => import('./pages/SsoCallback'));
+const Profile = lazy(() => import('./pages/Profile'));
 
 
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -31,6 +33,14 @@ const appRouter = createBrowserRouter([
       {
         path: "tictactoe",
         element: <Suspense fallback={<div className='flex justify-center items-center h-screen text-center text-2xl font-bold'>Loading...</div>}> <TicTacToe /></Suspense>
+      },
+      {
+        path: "/sso-callback",
+        element: <Suspense fallback={<div className='flex justify-center items-center h-screen text-center text-2xl font-bold'>Loading...</div>}> <SsoCallback /></Suspense>
+      },
+      {
+        path: "/profile",
+        element: <Suspense fallback={<div className='flex justify-center items-center h-screen text-center text-2xl font-bold'>Loading...</div>}> <Profile /></Suspense>
       }
     ],
     errorElement: <Suspense fallback={<div className='flex justify-center items-center h-screen text-center text-2xl font-bold'>Loading...</div>}> <PageNotFound /></Suspense>
