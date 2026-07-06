@@ -6,7 +6,6 @@ import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/react'
 
 function Header() {
 
-
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const [theme, setTheme] = useState(JSON.parse(localStorage.getItem("theme") || "null") || "medium");
@@ -33,20 +32,39 @@ function Header() {
         </div>
         <div className="relative">
           <Show when="signed-out">
-            <div className="h-8 w-8 md:h-12 md:w-12 rounded-full overflow-hidden flex justify-center items-center cursor-pointer" onClick={() => setDropdownOpen(prev => !prev)}>
+            <div className="h-8 w-8 rounded-full overflow-hidden flex justify-center items-center cursor-pointer" onClick={() => setDropdownOpen(prev => !prev)}>
               <img src={"https://res.cloudinary.com/dru7e6cnq/image/upload/v1774356031/default-profile-picture1_cfijqb.jpg"} className="h-full w-full object-cover" alt="Vite logo" />
             </div>
           </Show>
           <Show when="signed-in">
             <UserButton
+              userProfileMode="navigation"
+              userProfileUrl="/profile"
               appearance={{
+                variables: {
+                  colorPrimary: "#2563eb",
+                  colorBackground: "#ffffff",
+                  colorForeground: "#111827",
+                },
+
                 elements: {
-                  avatarBox: "!h-8 !w-8 border-2 border-blue-500",
-                  card: "shadow-sm",
-                  navbar: "bg-gray-100",
-                  profileSectionPrimaryButton: "!bg-blue-500"
-                }
-              }} />
+                  avatarBox:
+                    "!h-10 !w-10 border-2 border-blue-500",
+
+                  userButtonPopoverCard:
+                    "rounded-xl shadow-xl",
+
+                  userButtonPopoverActionButton:
+                    "hover:bg-blue-50",
+
+                  userButtonPopoverActionButtonText:
+                    "text-gray-700",
+
+                  userButtonPopoverFooter:
+                    "hidden",
+                },
+              }}
+            />
           </Show>
 
           {
@@ -54,10 +72,63 @@ function Header() {
               <Show when="signed-out">
                 <div className="absolute top-10 right-0 z-10 bg-white border border-gray-300 rounded-md shadow-md w-40 flex flex-col">
 
-                  <SignInButton>
+                  <SignInButton
+                    mode="modal"
+                    appearance={{
+                      variables: {
+                        colorPrimary: "#2563eb",
+                        colorBackground: "#ffffff",
+                        colorForeground: "#111827",
+                        colorInputForeground: "#111827",
+                        colorInput: "#f9fafb",
+                        borderRadius: "12px",
+                      },
+
+                      elements: {
+                        card: "shadow-2xl rounded-xl",
+                        headerTitle: "text-2xl font-bold",
+                        headerSubtitle: "text-gray-500",
+
+                        formButtonPrimary:
+                          "bg-blue-600 hover:bg-blue-700 text-white",
+
+                        formFieldInput:
+                          "rounded-lg border border-gray-300",
+
+                        socialButtonsBlockButton:
+                          "rounded-lg border",
+
+                        footerActionLink:
+                          "text-blue-600",
+                      },
+                    }}
+                  >
                     <button className="px-4 py-2 hover:bg-gray-100 text-left">Sign In</button>
                   </SignInButton>
-                  <SignUpButton>
+                  <SignUpButton
+                    mode="modal"
+                    appearance={{
+                      variables: {
+                        colorPrimary: "#2563eb",
+                        colorBackground: "#ffffff",
+                        colorForeground: "#111827",
+                        borderRadius: "12px",
+                      },
+
+                      elements: {
+                        card: "rounded-xl shadow-xl",
+
+                        formButtonPrimary:
+                          "bg-blue-600 hover:bg-blue-700",
+
+                        formFieldInput:
+                          "rounded-lg",
+
+                        socialButtonsBlockButton:
+                          "rounded-lg",
+                      },
+                    }}
+                  >
                     <button className="px-4 py-2 hover:bg-gray-100 text-left">Sign Up</button>
                   </SignUpButton>
 

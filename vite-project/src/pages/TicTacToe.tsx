@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, RotateCcw } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { useUser } from "@clerk/react";
 
 const TicTacToe: React.FC = () => {
+    const { isLoaded, isSignedIn } = useUser();
     const [board, setBoard] = useState<(string | null)[]>(Array(9).fill(null));
     const [xIsNext, setXIsNext] = useState<boolean>(true);
     const [winner, setWinner] = useState<string | null>(null);
@@ -56,6 +58,14 @@ const TicTacToe: React.FC = () => {
     };
 
     const isDraw = !winner && board.every(square => square !== null);
+
+    if (!isLoaded) {
+        return <div className="flex justify-center items-center h-screen text-center text-2xl font-bold">Loading...</div>;
+    }
+
+    if (!isSignedIn) {
+        return <div className="flex justify-center items-center h-screen text-center text-2xl font-bold">Please Sign in to view this page</div>;
+    }
 
     return (
         <div className="min-h-screen font-['Poppins',sans-serif] flex flex-col items-center justify-center p-4 bg-inherit text-white mt-12">

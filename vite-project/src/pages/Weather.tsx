@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useUser } from "@clerk/react";
 
 interface WeatherData {
     name: string;
@@ -37,6 +38,7 @@ interface ForecastData {
 const API = "3b478fdf40a893287863acd16f92f294";
 
 const Weather: React.FC = () => {
+    const { isLoaded, isSignedIn } = useUser();
     const [search, setSearch] = useState("");
     const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
     const [forecastData, setForecastData] = useState<ForecastData[]>([]);
@@ -109,6 +111,14 @@ const Weather: React.FC = () => {
             alert("Please Enter City or Country Name");
         }
     };
+
+    if (!isLoaded) {
+        return <div className="flex justify-center items-center h-screen text-center text-2xl font-bold">Loading...</div>;
+    }
+
+    if (!isSignedIn) {
+        return <div className="flex justify-center items-center h-screen text-center text-2xl font-bold">Please Sign in to view this page</div>;
+    }
 
     return (
         <div className="min-h-screen font-['Poppins',sans-serif] flex flex-col items-center justify-center p-0 md:p-4 m-0 overflow-hidden mt-12 md:mt-0">

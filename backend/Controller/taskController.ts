@@ -53,9 +53,12 @@ export const updateTask = async (req: any, res: any) => {
 
         const { id } = req.params;
         const { task, status } = req.body;
-        const updatedTask = await Task.findByIdAndUpdate(id, { task, status }, { new: true });
+        const updatedTask = await Task.findOneAndUpdate({
+            _id: id,
+            clerkId: userId,
+        }, { task, status }, { new: true });
         if (!updatedTask) {
-            return res.status(404).json({ message: "Task not found" });
+            return res.status(404).json({ message: "Task not found or you don't have permission to access it." });
         }
         res.status(200).json(updatedTask);
     } catch (error) {
@@ -74,9 +77,12 @@ export const deleteTask = async (req: any, res: any) => {
         }
 
         const { id } = req.params;
-        const deletedTask = await Task.findByIdAndDelete(id);
+        const deletedTask = await Task.findOneAndDelete({
+            _id: id,
+            clerkId: userId,
+        });
         if (!deletedTask) {
-            return res.status(404).json({ message: "Task not found" });
+            return res.status(404).json({ message: "Task not found or you don't have permission to access it." });
         }
         res.status(200).json({ message: "Task deleted successfully" });
     } catch (error) {

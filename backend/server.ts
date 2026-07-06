@@ -7,7 +7,9 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import { clerkMiddleware } from '@clerk/express'
 
-dotenv.config();
+dotenv.config({
+    path: `.env.${process.env.NODE_ENV || "development"}`,
+});
 
 connectDB();
 
