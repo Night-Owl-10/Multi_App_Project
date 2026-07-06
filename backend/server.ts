@@ -6,7 +6,9 @@ import userRoutes from './Routes/userRoute';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 
-dotenv.config();
+dotenv.config({
+    path: `.env.${process.env.NODE_ENV || "development"}`,
+});
 
 connectDB();
 
