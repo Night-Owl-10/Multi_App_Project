@@ -12,7 +12,7 @@ const Weather = lazy(() => import('./pages/Weather'));
 const TicTacToe = lazy(() => import('./pages/TicTacToe'));
 const Profile = lazy(() => import('./pages/Profile'));
 
-
+//main.tsx
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 
