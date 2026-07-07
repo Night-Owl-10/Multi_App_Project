@@ -1,9 +1,8 @@
 import Task from "../Model/taskModel";
-import { getAuth } from "@clerk/express";
 
 export const createTask = async (req: any, res: any) => {
     try {
-        const { userId } = getAuth(req)
+        const userId = 1 // Firebase Authentication not implemented yet
 
         if (!userId) {
             return res.status(401).json({
@@ -26,7 +25,7 @@ export const createTask = async (req: any, res: any) => {
 
 export const getAllTasks = async (req: any, res: any) => {
     try {
-        const { userId } = getAuth(req)
+        const userId = 1 // Firebase Authentication not implemented yet
 
         if (!userId) {
             return res.status(401).json({
@@ -34,7 +33,7 @@ export const getAllTasks = async (req: any, res: any) => {
             });
         }
 
-        const tasks = await Task.find({ clerkId: userId }).sort({ createdAt: -1 });
+        const tasks = await Task.find({ userId }).sort({ createdAt: -1 });
         res.status(200).json(tasks);
     } catch (error) {
         res.status(500).json({ message: "Error fetching tasks", error });
@@ -43,7 +42,7 @@ export const getAllTasks = async (req: any, res: any) => {
 
 export const updateTask = async (req: any, res: any) => {
     try {
-        const { userId } = getAuth(req)
+        const userId = 1 // Firebase Authentication not implemented yet
 
         if (!userId) {
             return res.status(401).json({
@@ -65,7 +64,7 @@ export const updateTask = async (req: any, res: any) => {
 
 export const deleteTask = async (req: any, res: any) => {
     try {
-        const { userId } = getAuth(req)
+        const userId = 1 // Firebase Authentication not implemented yet
 
         if (!userId) {
             return res.status(401).json({

@@ -1,13 +1,9 @@
 import mongoose from "mongoose";
 
 const taskSchema = new mongoose.Schema({
-    // user: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: "User",
-    //     required: true
-    // },
-    clerkId: {
-        type: String,
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
         required: true
     },
     task: String,

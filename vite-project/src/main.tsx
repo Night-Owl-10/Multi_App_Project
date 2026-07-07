@@ -4,17 +4,14 @@ import './index.css'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { lazy } from 'react';
 import App from './App';
-import { ClerkProvider } from '@clerk/react'
+import { AuthProvider } from "./context/AuthProvider";
+
 
 const Home = lazy(() => import('./pages/Home'));
 const PageNotFound = lazy(() => import('./pages/PageNotFound'));
 const Weather = lazy(() => import('./pages/Weather'));
 const TicTacToe = lazy(() => import('./pages/TicTacToe'));
-const SsoCallback = lazy(() => import('./pages/SsoCallback'));
 const Profile = lazy(() => import('./pages/Profile'));
-
-
-const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 
 const appRouter = createBrowserRouter([
@@ -35,10 +32,6 @@ const appRouter = createBrowserRouter([
         element: <Suspense fallback={<div className='flex justify-center items-center h-screen text-center text-2xl font-bold'>Loading...</div>}> <TicTacToe /></Suspense>
       },
       {
-        path: "/sso-callback",
-        element: <Suspense fallback={<div className='flex justify-center items-center h-screen text-center text-2xl font-bold'>Loading...</div>}> <SsoCallback /></Suspense>
-      },
-      {
         path: "/profile",
         element: <Suspense fallback={<div className='flex justify-center items-center h-screen text-center text-2xl font-bold'>Loading...</div>}> <Profile /></Suspense>
       }
@@ -49,8 +42,8 @@ const appRouter = createBrowserRouter([
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ClerkProvider publishableKey={clerkPubKey}>
+    <AuthProvider>
       <RouterProvider router={appRouter} />
-    </ClerkProvider>
+    </AuthProvider>
   </StrictMode>,
 )

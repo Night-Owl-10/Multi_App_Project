@@ -8,8 +8,11 @@ import {
 } from "@/components/ui/Dialog"
 import { useState } from "react"
 import { toast } from "react-toastify";
-import { useSignIn, useClerk } from "@clerk/react";
 import clsx from "clsx";
+import { signIn, signInWithGoogle } from "@/firebase/authService";
+import API from "@/api/axios";
+import { signOut } from "firebase/auth";
+import { auth } from "@/firebase/firebase";
 
 
 type SignInProps = {
@@ -18,9 +21,6 @@ type SignInProps = {
 }
 
 function SignIn({ isSignInOpen, setIsSignInOpen }: SignInProps) {
-
-  const { signIn } = useSignIn();
-  const clerk = useClerk();
 
   const [logInInfo, setLoginInfo] = useState({
     email: "",
@@ -34,28 +34,24 @@ function SignIn({ isSignInOpen, setIsSignInOpen }: SignInProps) {
     setLoginInfo({ ...logInInfo, [name]: value });
   }
 
-  // TODO:
-  // SignInFuture.sso() in Clerk v6.9.1 returns { error: null }
-  // without performing the redirect.
-  // Using authenticateWithRedirect() as a temporary workaround.
-  // Revisit after upgrading Clerk.
-
   async function handleGoogleSignIn() {
-    if (googleLoading || loading) return;
-
-    setGoogleLoading(true);
     try {
-      await clerk.client!.signIn.authenticateWithRedirect({
-        strategy: "oauth_google",
-        redirectUrl: "/sso-callback",
-        redirectUrlComplete: "/",
+      setGoogleLoading(true);
+
+      const userCredential = await signInWithGoogle();
+
+      const response = await API.post("/users/google-signIn", {
+        firebase_uid: userCredential.user.uid,
       });
-    } catch (err: any) {
-      toast.error(
-        err?.errors?.[0]?.longMessage ??
-        err?.errors?.[0]?.message ??
-        "Failed to sign in with Google"
-      );
+
+      toast.success(response.data.message);
+
+      setIsSignInOpen(false);
+
+    } catch (error: any) {
+      await signOut(auth);
+      toast.error(error.response?.data?.message || "Error signing in");
+    } finally {
       setGoogleLoading(false);
     }
   }
@@ -71,40 +67,38 @@ function SignIn({ isSignInOpen, setIsSignInOpen }: SignInProps) {
       return;
     }
 
-    setLoading(true);
-
     try {
-      const { error } = await signIn.password({
-        emailAddress: logInInfo.email,
-        password: logInInfo.password,
-      });
+      setLoading(true);
 
-      if (error) {
-        const errorMessage =
-          error.message === "The verification strategy is not valid for this account"
-            ? "This account was created with Google. Please continue with Google or set a password from your profile."
-            : error.longMessage ?? error.message;
+      const userCredential = await signIn(
+        logInInfo.email,
+        logInInfo.password
+      );
 
-        toast.error(errorMessage);
+      if (!userCredential.user.emailVerified) {
+        toast.error("Please verify your email before signing in.");
+        await signOut(auth);
         return;
       }
 
-      if (signIn.status === "complete") {
-        await signIn.finalize();
+      const response = await API.post("/users/email-signIn", {
+        firebase_uid: userCredential.user.uid,
+      });
 
-        toast.success("Signed in successfully!");
+      toast.success(response.data.message);
 
-        setLoginInfo({
-          email: "",
-          password: "",
-        });
+      setLoginInfo({
+        email: "",
+        password: "",
+      });
 
-        setIsSignInOpen(false);
-      }
-    } catch (err: any) {
+      setIsSignInOpen(false);
+
+    } catch (error: any) {
       toast.error(
-        err?.errors?.[0]?.message ??
-        "Something went wrong"
+        error.response?.data?.message ||
+        error.message ||
+        "Error signing in"
       );
     } finally {
       setLoading(false);

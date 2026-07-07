@@ -1,12 +1,32 @@
-import { useUser, useClerk } from "@clerk/react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useState } from "react";
 
+type UserProps = {
+    id: number,
+    fullName: string,
+    username: string,
+    imageUrl: string,
+    createdAt: string,
+    emailAddress: string,
+    verification: {
+        status: string
+    }
+}
+
 function Profile() {
-    const { user } = useUser();
-    const { signOut } = useClerk();
-    const navigate = useNavigate();
+    const user: UserProps = {
+        id: 1,
+        fullName: "John Doe",
+        username: "johndoe",
+        imageUrl: "https://via.placeholder.com/150",
+        createdAt: "2022-01-01",
+        emailAddress: "[EMAIL_ADDRESS]",
+        verification: {
+            status: "verified"
+        }
+    };
+
 
     const joinedDate = user?.createdAt
         ? new Date(user.createdAt).toLocaleDateString("en-IN", {
@@ -17,15 +37,7 @@ function Profile() {
         : "Unknown";
 
     async function handleSignOut() {
-        try {
-            await signOut();
-
-            toast.success("Signed out successfully.");
-
-            navigate("/");
-        } catch {
-            toast.error("Failed to sign out.");
-        }
+        // firebase signout logic
     }
 
     if (!user) {
@@ -66,7 +78,7 @@ function Profile() {
                             </h2>
 
                             <p className="font-medium">
-                                {user.primaryEmailAddress?.emailAddress}
+                                {user.emailAddress}
                             </p>
                         </div>
 
@@ -74,13 +86,13 @@ function Profile() {
                             <span>Email Verification</span>
 
                             <span
-                                className={`px-3 py-1 rounded-full text-sm font-medium ${user.primaryEmailAddress?.verification.status ===
+                                className={`px-3 py-1 rounded-full text-sm font-medium ${user.verification.status ===
                                     "verified"
                                     ? "bg-green-100 text-green-700"
                                     : "bg-red-100 text-red-700"
                                     }`}
                             >
-                                {user.primaryEmailAddress?.verification.status ===
+                                {user.verification.status ===
                                     "verified"
                                     ? "Verified"
                                     : "Not Verified"}

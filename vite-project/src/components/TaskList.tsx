@@ -3,7 +3,6 @@ import clsx from 'clsx'
 import { useState, useEffect } from 'react'
 import API from '../api/axios'
 import { toast } from 'react-toastify'
-import { useUser } from "@clerk/react";
 
 type Tasks = {
   _id: number;
@@ -20,8 +19,6 @@ type TaskListProps = {
 function TaskList({ setEditTask, refetch, setRefetch }: TaskListProps) {
   const [taskList, setTaskList] = useState<Tasks[]>([]);
 
-  const { isSignedIn, user } = useUser();
-
   useEffect(() => {
     async function fetchTasks() {
       try {
@@ -33,7 +30,7 @@ function TaskList({ setEditTask, refetch, setRefetch }: TaskListProps) {
     }
 
     fetchTasks();
-  }, [refetch, isSignedIn]);
+  }, [refetch]);
 
   function handleEdit(id: number) {
     const taskToEdit = taskList.find(task => task._id === id);

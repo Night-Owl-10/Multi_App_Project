@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 export const connectDB = async () => {
     try {
-        await mongoose.connect("mongodb://localhost:27017/ClerkIntegration")
+        await mongoose.connect("mongodb://localhost:27017/ToDoAppDB")
         console.log("✅ Database connection is successful.");
 
     } catch (error) {

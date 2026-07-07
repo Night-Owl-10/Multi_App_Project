@@ -2,7 +2,6 @@ import TaskList from "../components/TaskList"
 import { useState } from "react"
 import { toast } from "react-toastify"
 import API from "../api/axios"
-import { useUser } from "@clerk/react";
 
 type Task = {
   _id: number;
@@ -17,7 +16,7 @@ function Home() {
   const [editTask, setEditTask] = useState<Task | null>(null);
   const [refetch, setRefetch] = useState(false);
 
-  const { isSignedIn, user } = useUser();
+  const isSignedIn = false;
 
   function handleReset() {
     setTask("");

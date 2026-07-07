@@ -7,9 +7,13 @@ import {
     DialogClose,
 } from "@/components/ui/Dialog"
 import { useState } from "react"
-import { toast } from "react-toastify";
-import { useSignUp } from "@clerk/react";
-import Otp from "./Otp";
+import { toast } from "react-toastify"
+import { signUp, signInWithGoogle, sendVerificationEmail } from "../firebase/authService";
+import { Loader2 } from "lucide-react";
+import axios from "axios";
+import API from "@/api/axios";
+import { deleteUser, updateProfile } from "firebase/auth";
+import type { UserCredential } from "firebase/auth";
 
 type SignUpProps = {
     isSignUpOpen: boolean;
@@ -18,31 +22,75 @@ type SignUpProps = {
 
 function SignUp({ isSignUpOpen, setIsSignUpOpen }: SignUpProps) {
 
-    const { signUp } = useSignUp();
-
-
+    const DEFAULT_AVATAR = "https://res.cloudinary.com/dru7e6cnq/image/upload/v1774356042/profile_n0nnut.png"
+    const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+    const [thumbnailPreview, setThumbnailPreview] = useState<string>(DEFAULT_AVATAR);
     const [info, setInfo] = useState({
         username: "",
         email: "",
-        password: "",
+        password: ""
     });
     const [loading, setLoading] = useState(false);
-    const [showOtpModal, setShowOtpModal] = useState(false);
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
         const { name, value } = e.target;
         setInfo({ ...info, [name]: value });
     }
 
-    async function handleGoogleSignUp() {
-        const { error } = await signUp.sso({
-            strategy: "oauth_google",
-            redirectCallbackUrl: "/sso-callback",
-            redirectUrl: "/",
-        });
+    function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
 
-        if (error) {
-            toast.error(error.longMessage ?? error.message);
+        setThumbnailFile(file);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const result = e.target?.result;
+            if (typeof result === "string") {
+                setThumbnailPreview(result);
+            }
+        }
+        reader.readAsDataURL(file);
+    }
+
+    const uploadImage = async (file: File) => {
+        try {
+            const data = new FormData();
+
+            data.append("file", file);
+            data.append("upload_preset", "multi-app");
+
+            const response = await axios.post(
+                `https://api.cloudinary.com/v1_1/dru7e6cnq/image/upload`,
+                data
+            );
+
+            return {
+                secure_url: response.data.secure_url,
+                public_id: response.data.public_id,
+            };
+        } catch (error: any) {
+            toast.error(error?.message || "Failed to upload image");
+        }
+    };
+
+    async function handleGoogleSignUp() {
+        const userCredential = await signInWithGoogle();
+
+        try {
+            try {
+                const response = await API.post("/users/google-signUp", {
+                    username: userCredential.user.displayName,
+                    email: userCredential.user.email,
+                    firebase_uid: userCredential.user.uid,
+                    avatar_url: userCredential.user.photoURL,
+                });
+                toast.success(response.data.message);
+            } catch (error: any) {
+                await deleteUser(userCredential.user);
+                throw error;
+            }
+        } catch (error: any) {
+            toast.error(error?.message || "Error signing up");
         }
     }
 
@@ -54,67 +102,64 @@ function SignUp({ isSignUpOpen, setIsSignUpOpen }: SignUpProps) {
             return;
         }
 
+        let avatar: string | undefined;
+        let image:
+            | {
+                secure_url: string;
+                public_id: string;
+            }
+            | undefined;
+
+        if (thumbnailFile) {
+            image = await uploadImage(thumbnailFile);
+
+            if (!image) {
+                return;
+            }
+
+            avatar = image.secure_url;
+        }
+
+        let userCredential: UserCredential;
+
         try {
-            const { error } = await signUp.password({
-                username: info.username,
-                emailAddress: info.email,
-                password: info.password,
+            setLoading(true);
+            userCredential = await signUp(info.email, info.password);
+            await updateProfile(userCredential.user, {
+                displayName: info.username,
+                photoURL: avatar,
             });
+            await sendVerificationEmail(userCredential.user);
+            try {
+                const response = await API.post("/users/email-signUp", {
+                    username: info.username,
+                    email: info.email,
+                    firebase_uid: userCredential.user.uid,
+                    avatar_url: avatar,
+                    avatar_public_id: image?.public_id ?? null
+                });
+                setInfo({
+                    username: "",
+                    email: "",
+                    password: ""
+                });
+                setThumbnailFile(null);
+                setThumbnailPreview(DEFAULT_AVATAR);
+                setIsSignUpOpen(false);
+                toast.success(response.data.message || "Account Created Successfully Please Verify the Email");
 
-            if (error) {
-                toast.error(error.longMessage ?? error.message);
-                return;
+            } catch (error: any) {
+                await deleteUser(userCredential.user);
+                throw error;
             }
 
-            const { error: sendError } =
-                await signUp.verifications.sendEmailCode();
-
-            if (sendError) {
-                toast.error(sendError.longMessage ?? sendError.message);
-                return;
-            }
-
-            setShowOtpModal(true);
-
-        } catch (err: any) {
-            toast.error(
-                err?.errors?.[0]?.message ?? "Something went wrong"
-            );
-        }
-    }
-
-    async function handleResendOtp() {
-        const { error } = await signUp.verifications.sendEmailCode();
-
-        if (error) {
-            toast.error(error.longMessage ?? error.message);
-            return;
-        }
-    }
-
-    async function handleVerifyOtp(code: string) {
-        const { error } =
-            await signUp.verifications.verifyEmailCode({
-                code,
-            });
-
-        if (error) {
-            toast.error(error.longMessage ?? error.message);
-            return;
+        } catch (error: any) {
+            toast.error(error?.message || "Error signing up");
+        } finally {
+            setLoading(false);
         }
 
-        toast.success("Email verified!");
-
-        setShowOtpModal(false);
-        setIsSignUpOpen(false);
-
-        setInfo({
-            username: "",
-            email: "",
-            password: "",
-        });
     }
-
 
     return (
         <Dialog open={isSignUpOpen} onOpenChange={setIsSignUpOpen}>
@@ -132,6 +177,16 @@ function SignUp({ isSignUpOpen, setIsSignUpOpen }: SignUpProps) {
                         <span className="mx-3 text-gray-500">or</span>
                         <span className="h-px bg-gray-500 w-1/4"></span>
                     </div>
+                    <div className="flex flex-col items-center gap-4">
+                        <div className="flex justify-center items-center gap-2">
+                            <p className="text-sm xs:text-base">Upload Avatar:</p>
+                            <input type="file" onChange={(e) => handleFileChange(e)} className="w-38 xs:w-48 text-center p-1 text-xs xs:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        </div>
+                        <div className="w-16 h-16 border border-gray-300 rounded-full overflow-hidden relative">
+                            <img src={thumbnailPreview} className="h-full w-full object-cover rounded-full" alt="Avatar preview" />
+                            {loading && <Loader2 className="loader" />}
+                        </div>
+                    </div>
                     <button type="button" onClick={handleGoogleSignUp} className="block p-2 mx-auto w-fit bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Sign Up with Google</button>
                     <div className="flex justify-center items-center gap-4 mt-4">
                         <button type="submit" className="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Sign Up</button>
@@ -141,13 +196,6 @@ function SignUp({ isSignUpOpen, setIsSignUpOpen }: SignUpProps) {
                     </div>
                 </form>
             </DialogContent>
-            <Otp
-                open={showOtpModal}
-                setOpen={setShowOtpModal}
-                username={info.username}
-                onVerify={handleVerifyOtp}
-                onResend={handleResendOtp}
-            />
         </Dialog>
     )
 }

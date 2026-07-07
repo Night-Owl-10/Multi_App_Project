@@ -2,15 +2,14 @@
 import { useState, useEffect } from "react"
 import { toast } from "react-toastify";
 import { useNavigate, Link } from "react-router-dom";
-import { Show, useUser, useClerk } from "@clerk/react";
 import SignUp from "./SignUp";
 import SignIn from "./SignIn";
+import { useAuth } from "../hooks/useAuth";
 
 
 function Header() {
 
-  const { user } = useUser();
-  const { signOut } = useClerk();
+  const { firebaseUser, profile, loading } = useAuth();
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isSignInOpen, setIsSignInOpen] = useState(false);
@@ -32,16 +31,9 @@ function Header() {
 
 
   async function handleSignOut() {
-    try {
-      await signOut();
-
-      toast.success("Signed out successfully.");
-
-      navigate("/");
-    } catch {
-      toast.error("Failed to sign out.");
-    }
+    // firebase signout logic
   }
+
   return (
     <header>
       <div className="bg-white h-16 border border-gray-300 border-b-2 shadow-[-10px_0px_20px_-5px_rgba(0,0,0,0.3)] rounded-t-lg w-full flex justify-between items-center gap-4 px-4 md:px-8">
@@ -55,7 +47,6 @@ function Header() {
           <div className="h-8 w-8 rounded-full overflow-hidden flex justify-center items-center cursor-pointer" onClick={() => setDropdownOpen(prev => !prev)}>
             <img
               src={
-                user?.imageUrl ??
                 "https://res.cloudinary.com/dru7e6cnq/image/upload/v1774356031/default-profile-picture1_cfijqb.jpg"
               }
               alt="Profile"
@@ -69,26 +60,22 @@ function Header() {
             dropdownOpen && (
 
               <div className="absolute top-10 right-0 z-10 bg-white border border-gray-300 rounded-md shadow-md w-40 flex flex-col">
-                <Show when="signed-out">
-                  <button onClick={() => {
-                    setIsSignInOpen(true);
-                    setDropdownOpen(false);
-                  }} className="px-4 py-2 hover:bg-gray-100 text-left">Sign In</button>
-                  <button onClick={() => {
-                    setIsSignUpOpen(true);
-                    setDropdownOpen(false);
-                  }} className="px-4 py-2 hover:bg-gray-100 text-left">Sign Up</button>
-                </Show>
-                <Show when="signed-in">
-                  <button onClick={() => {
-                    setDropdownOpen(false);
-                    navigate("/profile");
-                  }} className="px-4 py-2 hover:bg-gray-100 text-left">Profile</button>
-                  <button onClick={() => {
-                    handleSignOut();
-                    setDropdownOpen(false);
-                  }} className="px-4 py-2 hover:bg-gray-100 text-left">Sign Out</button>
-                </Show>
+                {!firebaseUser && <button onClick={() => {
+                  setIsSignInOpen(true);
+                  setDropdownOpen(false);
+                }} className="px-4 py-2 hover:bg-gray-100 text-left">Sign In</button>}
+                {!firebaseUser && <button onClick={() => {
+                  setIsSignUpOpen(true);
+                  setDropdownOpen(false);
+                }} className="px-4 py-2 hover:bg-gray-100 text-left">Sign Up</button>}
+                {firebaseUser && <button onClick={() => {
+                  setDropdownOpen(false);
+                  navigate("/profile");
+                }} className="px-4 py-2 hover:bg-gray-100 text-left">Profile</button>}
+                {firebaseUser && <button onClick={() => {
+                  handleSignOut();
+                  setDropdownOpen(false);
+                }} className="px-4 py-2 hover:bg-gray-100 text-left">Sign Out</button>}
               </div>
 
             )
