@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
 
 interface WeatherData {
     name: string;
@@ -37,6 +38,8 @@ interface ForecastData {
 const API = "3b478fdf40a893287863acd16f92f294";
 
 const Weather: React.FC = () => {
+
+    const { firebaseUser, loading } = useAuth();
     const [search, setSearch] = useState("");
     const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
     const [forecastData, setForecastData] = useState<ForecastData[]>([]);
@@ -109,6 +112,14 @@ const Weather: React.FC = () => {
             alert("Please Enter City or Country Name");
         }
     };
+
+
+    if (loading) {
+        return <div className='flex justify-center items-center h-screen text-center text-2xl font-bold'>Loading...</div>
+    }
+    if (!firebaseUser) {
+        return <div className='flex justify-center items-center h-screen text-center text-2xl font-bold'>Please sign in to play Tic Tac Toe.</div>;
+    }
 
     return (
         <div className="min-h-screen font-['Poppins',sans-serif] flex flex-col items-center justify-center p-0 md:p-4 m-0 overflow-hidden mt-12 md:mt-0">

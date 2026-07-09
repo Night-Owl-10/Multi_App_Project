@@ -4,7 +4,9 @@ import {
     signInWithEmailAndPassword,
     GoogleAuthProvider,
     signInWithPopup,
-    sendEmailVerification
+    sendEmailVerification,
+    signOut,
+    sendPasswordResetEmail,
 } from "firebase/auth";
 import type { User } from "firebase/auth";
 
@@ -40,3 +42,10 @@ export async function sendVerificationEmail(user: User) {
     await sendEmailVerification(user);
 }
 
+export async function logout() {
+    await signOut(auth);
+}
+
+export async function forgotPassword(email: string) {
+    return await sendPasswordResetEmail(auth, email);
+}

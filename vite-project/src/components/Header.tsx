@@ -5,6 +5,7 @@ import { useNavigate, Link } from "react-router-dom";
 import SignUp from "./SignUp";
 import SignIn from "./SignIn";
 import { useAuth } from "../hooks/useAuth";
+import { logout } from "../firebase/authService";
 
 
 function Header() {
@@ -31,7 +32,13 @@ function Header() {
 
 
   async function handleSignOut() {
-    // firebase signout logic
+    try {
+      await logout();
+      toast.success("Signed out successfully");
+      navigate("/");
+    } catch (error: any) {
+      toast.error(error?.message || "Error signing out");
+    }
   }
 
   return (
@@ -46,9 +53,7 @@ function Header() {
         <div className="relative">
           <div className="h-8 w-8 rounded-full overflow-hidden flex justify-center items-center cursor-pointer" onClick={() => setDropdownOpen(prev => !prev)}>
             <img
-              src={
-                "https://res.cloudinary.com/dru7e6cnq/image/upload/v1774356031/default-profile-picture1_cfijqb.jpg"
-              }
+              src={profile?.avatar_url || "https://res.cloudinary.com/dru7e6cnq/image/upload/v1774356031/default-profile-picture1_cfijqb.jpg"}
               alt="Profile"
               className="h-full w-full object-cover"
             />

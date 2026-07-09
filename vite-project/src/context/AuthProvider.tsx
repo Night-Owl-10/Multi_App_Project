@@ -2,6 +2,7 @@ import {
     createContext,
     useEffect,
     useState,
+    useCallback,
     type ReactNode,
 } from "react";
 import type { User } from "firebase/auth";
@@ -14,6 +15,7 @@ interface AuthContextType {
     firebaseUser: User | null;
     profile: UserDocument | null;
     loading: boolean;
+    refreshProfile: () => Promise<void>;
 }
 
 interface AuthProviderProps {
@@ -24,6 +26,7 @@ export const AuthContext = createContext<AuthContextType>({
     firebaseUser: null,
     profile: null,
     loading: true,
+    refreshProfile: async () => {},
 });
 
 export function AuthProvider({ children }: AuthProviderProps) {
@@ -45,7 +48,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
             async function fetchProfile(user: User) {
                 try {
                     const response = await API.get(`/users/get-user/${user.uid}`);
-
                     setProfile(response.data.user);
                 } catch (error: any) {
                     console.log(error);
@@ -60,12 +62,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return unsubscribe;
     }, []);
 
+    /**
+     * Re-fetches the profile from the backend using the current authenticated
+     * user and updates the global profile state. Call this after any mutation
+     * (e.g. username change, avatar update) to keep the UI in sync.
+     */
+    const refreshProfile = useCallback(async () => {
+        if (!firebaseUser) return;
+        try {
+            const response = await API.get(`/users/get-user/${firebaseUser.uid}`);
+            setProfile(response.data.user);
+        } catch (error: any) {
+            console.log("Failed to refresh profile:", error);
+        }
+    }, [firebaseUser]);
+
     return (
         <AuthContext.Provider
             value={{
                 firebaseUser,
                 profile,
                 loading,
+                refreshProfile,
             }}
         >
             {children}

@@ -10,7 +10,7 @@ export async function EmailSignUp(req: any, res: any) {
 
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            return res.status(400).json({ message: "User already exists", user: existingUser });
+            return res.status(400).json({ message: "User already exists" });
         }
 
         const newUser = new User({

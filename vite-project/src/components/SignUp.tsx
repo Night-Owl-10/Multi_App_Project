@@ -6,9 +6,9 @@ import {
     DialogDescription,
     DialogClose,
 } from "@/components/ui/Dialog"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { toast } from "react-toastify"
-import { signUp, signInWithGoogle, sendVerificationEmail } from "../firebase/authService";
+import { signUp, signInWithGoogle, sendVerificationEmail, logout } from "../firebase/authService";
 import { Loader2 } from "lucide-react";
 import axios from "axios";
 import API from "@/api/axios";
@@ -31,6 +31,19 @@ function SignUp({ isSignUpOpen, setIsSignUpOpen }: SignUpProps) {
         password: ""
     });
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (!isSignUpOpen) {
+            setInfo({
+                username: "",
+                email: "",
+                password: "",
+            });
+            setThumbnailFile(null);
+            setThumbnailPreview(DEFAULT_AVATAR);
+            setLoading(false);
+        }
+    }, [isSignUpOpen]);
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
         const { name, value } = e.target;
@@ -85,6 +98,7 @@ function SignUp({ isSignUpOpen, setIsSignUpOpen }: SignUpProps) {
                     avatar_url: userCredential.user.photoURL,
                 });
                 toast.success(response.data.message);
+                setIsSignUpOpen(false);
             } catch (error: any) {
                 await deleteUser(userCredential.user);
                 throw error;
@@ -102,7 +116,7 @@ function SignUp({ isSignUpOpen, setIsSignUpOpen }: SignUpProps) {
             return;
         }
 
-        let avatar: string | undefined;
+        let avatar: string | undefined = DEFAULT_AVATAR;
         let image:
             | {
                 secure_url: string;
@@ -145,6 +159,7 @@ function SignUp({ isSignUpOpen, setIsSignUpOpen }: SignUpProps) {
                 });
                 setThumbnailFile(null);
                 setThumbnailPreview(DEFAULT_AVATAR);
+                await logout();
                 setIsSignUpOpen(false);
                 toast.success(response.data.message || "Account Created Successfully Please Verify the Email");
 
