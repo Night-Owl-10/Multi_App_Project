@@ -1,11 +1,8 @@
-import { v2 as cloudinary } from "cloudinary";
+import cloudinary from "../Connection/cloudinary";
 import User from "../Model/userModal";
+import Task from "../Model/taskModel";
 
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+
 
 export async function UpdateUsername(req: any, res: any) {
     try {
@@ -117,7 +114,10 @@ export async function DeleteAccount(req: any, res: any) {
             }
         }
 
-        // Step 3: Delete the MongoDB document
+        // Step 3: Delete all tasks belonging to this user
+        await Task.deleteMany({ user: user._id });
+
+        // Step 4: Delete the MongoDB user document
         await User.findOneAndDelete({ firebase_uid });
 
         return res.status(200).json({ message: "Account deleted successfully" });

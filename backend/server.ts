@@ -3,10 +3,7 @@ import cors from 'cors';
 import { connectDB } from './Connection/connection';
 import taskRoutes from './Routes/taskRoute';
 import cookieParser from 'cookie-parser';
-import dotenv from 'dotenv';
 import userRoutes from './Routes/userRoute';
-
-dotenv.config();
 
 connectDB();
 

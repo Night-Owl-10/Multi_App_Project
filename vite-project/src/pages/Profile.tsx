@@ -52,6 +52,10 @@ function Profile() {
 
     const isEmailVerified = firebaseUser?.emailVerified ?? false;
 
+    const hasPasswordProvider = firebaseUser?.providerData.some(
+        p => p.providerId === "password"
+    );
+
     // ── Sign out ─────────────────────────────────────────────────────────────
     async function handleSignOut() {
         try {
@@ -378,7 +382,7 @@ function Profile() {
                     {/* Action buttons */}
                     <div className="flex flex-wrap gap-3 mt-8 justify-center px-8">
 
-                        <button
+                        {hasPasswordProvider && <button
                             onClick={() => {
                                 setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
                                 setShowPasswordModal(true);
@@ -386,7 +390,7 @@ function Profile() {
                             className="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-lg text-sm"
                         >
                             Change Password
-                        </button>
+                        </button>}
 
                         <button
                             onClick={handleSignOut}

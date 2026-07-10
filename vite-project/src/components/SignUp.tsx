@@ -14,6 +14,7 @@ import axios from "axios";
 import API from "@/api/axios";
 import { deleteUser, updateProfile } from "firebase/auth";
 import type { UserCredential } from "firebase/auth";
+import clsx from "clsx";
 
 type SignUpProps = {
     isSignUpOpen: boolean;
@@ -202,11 +203,11 @@ function SignUp({ isSignUpOpen, setIsSignUpOpen }: SignUpProps) {
                             {loading && <Loader2 className="loader" />}
                         </div>
                     </div>
-                    <button type="button" onClick={handleGoogleSignUp} className="block p-2 mx-auto w-fit bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Sign Up with Google</button>
+                    <button disabled={loading} type="button" onClick={handleGoogleSignUp} className="block p-2 mx-auto w-fit bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">Sign Up with Google</button>
                     <div className="flex justify-center items-center gap-4 mt-4">
-                        <button type="submit" className="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Sign Up</button>
+                        <button disabled={loading} type="submit" className="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">Sign Up</button>
                         <DialogClose asChild>
-                            <button className="p-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500">Cancel</button>
+                            <button disabled={loading} className="p-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed">Cancel</button>
                         </DialogClose>
                     </div>
                 </form>

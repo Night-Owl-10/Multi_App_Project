@@ -34,3 +34,6 @@ dist-ssr
 .env.*.local
 .env.production
 .env.development
+
+# Firebase service account — contains private credentials, never commit
+backend/firebase-service-account.json
