@@ -13,7 +13,7 @@ const Weather = lazy(() => import('./pages/Weather'));
 const TicTacToe = lazy(() => import('./pages/TicTacToe'));
 const Profile = lazy(() => import('./pages/Profile'));
 
-
+//main.tsx
 const appRouter = createBrowserRouter([
   {
     path: "/",
